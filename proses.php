@@ -232,6 +232,26 @@ function prosesPesanTeks($message)
             $response = curl_exec($curl);
             curl_close($curl);
             $json2 = json_decode($response,true);
+            
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => "https://api.byu.id/api/inbox",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "GET",
+                CURLOPT_HTTPHEADER => array(
+                    "msisdn: 61815xxxxxxx",
+                    "Content-Type: application/json",
+                    "Authorization: Bearer ISIKAN_BEARER_TOKEN_DISINI"
+                ),
+            ));
+            $response = curl_exec($curl);
+            curl_close($curl);
+            $json3 = json_decode($response,true);
 
 
                 //INI SEKAT BIAR GAPUSHINK
@@ -281,6 +301,18 @@ function prosesPesanTeks($message)
                     $text .= " minute`\n\n";
                 }
                 }
+
+            $text .= "\n\n📩 *Last Inbox*\n";
+                if ($json3['data'][0]['hasRead'] == 1) {
+                    $wisurung = "Already read";
+                } else {
+                    $wisurung = "Unread";
+                }
+            $text .= "Message ID: `".$json3['data'][0]['id']."`\n";
+            $text .= "Title: *".$json3['data'][0]['title']."*\n";
+            $text .= "Message: ".$json3['data'][0]['content']."\n";
+            $text .= "Time received: `".$json3['data'][0]['timestamp']."`\n";
+            
             $text .= "`Processed in ".$hitung." seconds`";
             sendApiMsg($chatid, $text);
         } else {
